@@ -1,0 +1,38 @@
+
+		{{$SelAbv := .Orders.SelectedAbv}}
+		{{$UnselAbv := .Orders.UnselectedAbv}}
+		
+		<thead id="tableHead">
+	<tr class="header">
+		<th>
+		
+		<th>
+			<div class="sortby">
+				{{ range $i, $val := .Orders.Unselected }}
+					{{index $UnselAbv $i}} {{.}}
+					{{if eq $i 0}}selected{{end}}
+				{{end}}
+			<a href="/{{.Search}}/{{.Categories.Short}}/{{.Orders.Short}}/{{.Page}}" title="By Category">Category</a></th>
+			<a href="/{{.Search}}/{{.Categories.Short}}/{{.Orders.Short}}/{{.Page}}" title="By Name">Name</a>
+			<a href="/{{.Search}}/{{.Categories.Short}}/{{.Orders.Short}}/{{.Page}}" title="By Date">Date</a>,
+			<a href="/{{.Search}}/{{.Categories.Short}}/{{.Orders.Short}}/{{.Page}}" title="By Size">Size</a>,
+			<span style="white-space: nowrap;">
+			<a href="/{{.Search}}/{{.Categories.Short}}/{{.Orders.Short}}/{{.Page}}" title="By User">User</a>
+			</span>,
+			<a href="/{{.Search}}/{{.Categories.Short}}/{{.Orders.Short}}/{{.Page}}" title="By Seeders">Seed</a>,
+			<a href="/{{.Search}}/{{.Categories.Short}}/{{.Orders.Short}}/{{.Page}}" title="By Leechers">Leech</a>
+			)
+			</div>
+		</th>
+		<th>
+			<abbr title="Seeders"><a href="{/{{.Search}}/{{.Categories.Short}}/{{.Orders.Short}}/{{.Page}}" title="Order by Seeders">SE</a>
+			</abbr>
+		</th>
+		<th>
+			<abbr title="Leechers"><a href="/{{.Search}}/{{.Categories.Short}}/{{.Orders.Short}}/{{.Page}}" title="Order by Leechers">LE</a>
+			</abbr>
+		</th>
+	</tr>
+</thead>
+
+

@@ -1,0 +1,38 @@
+[
+	{
+		"uuid": "20",
+		"name": "nate",
+		"appointee": true,
+		"score": 0
+	},
+	{
+		"uuid": "69",
+		"name": "eddiep",
+		"appointee": true,
+		"score": 0
+	},
+	{
+		"uuid": "99",
+		"name": "everen",
+		"appointee": true,
+		"score": 999999
+	},
+	{
+		"uuid": "100",
+		"name": "toren",
+		"appointee": true,
+		"score": 99999
+	},
+	{
+		"uuid": "777",
+		"name": "bob",
+		"appointee": false,
+		"score": 50
+	},
+	{
+		"uuid": "14",
+		"name": "kate",
+		"appointee": false,
+		"score": 49
+	}
+]

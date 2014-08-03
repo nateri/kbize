@@ -1,0 +1,18 @@
+{
+    "settings":
+    {
+        "GoSublime":
+        {
+            "env":
+            {
+            	//"GOPATH": "$HOME/net-go"
+            }
+        }
+    },
+    "folders":
+    [
+		{
+			"path": "/C/Go/src/github.com/nateri/net-go"
+		}
+    ]
+}

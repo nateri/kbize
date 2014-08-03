@@ -1,0 +1,147 @@
+<div id="header">
+	<form method="get" id="q" action="/netsearch/">
+		<a href="/" class="img"><img src="{{.Host}}/static/img/noof.png" id="NetgoLogo" alt="Netgo" /></a>
+		
+		<b>
+			<a href="{{.Host}}" title="Netgo">Netgo Home</a>&nbsp;&nbsp;|&nbsp;
+			<a href="{{.Host}}/netget" title="Netget">Netgo Get</a> | <a href="{{.Host}}/netsearch" title="Netsearch">Netgo Search</a>
+		</b>
+		
+		<br />
+		
+		<input type="search" title="Netgo Search" name="search" required placeholder="Enter search" value="{{.Search}}" style="background-color:#ffffe0;" class="searchBox" />
+		<input value="Netgo Search" type="submit" class="submitbutton" />
+		
+		<br />
+		
+		<input type="hidden" name="category" value="0" />
+		<label for="audio">
+			<input id="audio" name="category" value="A" {{.Categories.Checked.A}} onclick="" type="checkbox"/>Audio
+		</label>
+		<label for="video">
+			<input id="video" name="category" value="V" {{.Categories.Checked.V}} onclick="" type="checkbox"/>Video
+		</label>
+		<label for="apps">
+			<input id="apps" name="category" value="P" {{.Categories.Checked.P}} onclick="" type="checkbox"/>Applications
+		</label>
+		<label for="games">
+			<input id="games" name="category" value="G" {{.Categories.Checked.G}} onclick="" type="checkbox"/>Games
+		</label>
+		<label for="nsfw">
+			<input id="nsfw" name="category" value="N" {{.Categories.Checked.N}} onclick="" type="checkbox"/>Nsfw
+		</label>
+		<label for="other">
+			<input id="other" name="category" value="O" {{.Categories.Checked.O}} onclick="" type="checkbox"/>Other
+		</label>
+		<br />
+	
+	
+		<script language="javascript" type="text/javascript">
+		var cars = ["Saab", "Volvo", "BMW"];
+		if ($.inArray(fruit, ['banana', 'lemon', 'mango', 'pineapple']) >= 0) {
+		}
+		
+		function select_option(list1, list2)
+		{
+			$("#sort_orders_unselected  option:selected").appendTo("#sort_orders_selected");
+			
+			//var test = $("#src  option:selected")
+			
+			//document.write("select_option: "+test+"<br />")
+			//test.appendTo("#list2");
+			// todo: remove related option from list1
+		}
+		function clear_option(list1, list2)
+		{
+			//var list1 = $("#list1")
+			//var list2 = $("#list2")
+			var test = $("#src  option:selected")
+		
+			//document.write("clear_option: "+test+"<br />")
+			test.appendTo(list1);
+			
+			// todo: add related option to list1
+			//var myselect = document.getElementById('MyPizzaSelect');
+			//list1.options.push(new Option('Pizza Margarita', '12345'));
+		}
+		
+
+		function funswitch()
+		{
+			var grade="AA";
+			switch (grade)
+			{
+			case "AA": document.write("Good job<br />");
+			default:  document.write("Unknown grade<br />")
+			}
+			document.write("Exiting switch block");
+		}
+		
+		function write_dbg(grade)
+		{
+			document.write(grade);
+		}
+		</script>
+  
+		{{$SelAbv := .Orders.SelectedAbv}}
+		{{$UnselAbv := .Orders.UnselectedAbv}}
+		
+		<!--
+		<style>
+			.remove_scroll { display:inline-block; vertical-align:top; overflow:hidden; border:solid grey 1px; }
+			.remove_scroll select { padding:10px; margin:-5px -20px -5px -5px; }
+		</style>
+
+		<div class="remove_scroll" id="sort">
+			<select id="list1" name="sort_orders_unselected" size="12" style="width: 115px;">
+				{{ range $i, $val := .Orders.Unselected }}
+				<option name="selected" value="{{index $UnselAbv $i}}">{{.}} {{if eq $i 0}}selected{{end}}</option>
+				{{end}}
+			</select>
+			<select id="list2" name="sort_orders_selected" size="12" style="width: 115px;">
+				{{ range $i, $val := .Orders.Selected }}
+				<option value="{{index $SelAbv $i}}">{{.}} {{if eq $i 0}}selected{{end}}</option>
+				{{end}}
+			</select>
+		</div>
+		<div id="select">
+			<input id="addorder" type="button" value="->" style="width: 90px;" onclick="select_option(list1, list2);" />
+			<input id="removeorder" type="button" value="<-" style="width: 90px;" onclick="clear_option(list1, list2);" />
+		</div>
+		-->
+		
+		<!--
+				{{ range $i, $val := .Orders.Unselected }}
+				<option name="selected" value="{{index $UnselAbv $i}}">{{.}} {{if eq $i 0}}selected{{end}}</option>
+				{{end}}
+				{{ range $i, $val := .Orders.Unselected }}
+				<option name="selected" value="{{index $UnselAbv $i}}">{{.}} {{if eq $i 0}}selected{{end}}</option>
+				{{end}}
+		-->
+		<!--
+		<ul id="order">
+			{{ range $i, $val := .Orders.Selected }}
+			<li {{index $SelAbv $i}} {{.}} </li>
+			{{end}}
+		</ul>
+		<script type="text/javascript">
+			$("ul:order").dragsort();
+		</script>
+		-->
+		<ul id="order">
+			<li>Size</li>
+			<li>vegetables</li>
+			<li>meat</li>
+			<li>milk</li>
+			<li>butter</li>
+			<li>ice cream</li>
+		</ul>
+		<script type="text/javascript">
+			$("ul:order").dragsort();
+		</script>
+		
+		<input type="hidden" name="page" value="{{.Page}}" />
+	</form>
+</div><!-- // div:header -->
+
+

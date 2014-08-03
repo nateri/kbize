@@ -1,0 +1,6 @@
+
+{{ $title := .Site.Title }}
+{{ range .Categories }}
+	<p>{{$title}} ({.Count})</p>
+{{.end}}
+
