@@ -20,7 +20,7 @@ import (
 	//"strconv"
 	"bytes"
 	"fmt"
-	"github.com/nateri/net-go"
+	"github.com/nateri/kbize"
 	"github.com/op/go-logging"
 )
 
@@ -81,7 +81,7 @@ func AddHttpHandlers() {
 	http.Handle("/kbize/", DynHandle{netgo.KbizeRequestHandler, "Kbize", false})
 
 	http.Handle("/netget/", DynHandle{netgo.KbizeRequestHandler, "Netget", false})
-	http.Handle("/tpb/", DynHandle{netgo.TpbSearchRequestHandler, "TpbSearch", true})
+	//http.Handle("/tpb/", DynHandle{netgo.TpbSearchRequestHandler, "TpbSearch", true})
 
 	http.Handle("/shutdown/", DynHandle{netgo.ShutdownRequestHandler, "Shutdown", false})
 

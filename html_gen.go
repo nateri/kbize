@@ -13,15 +13,15 @@ import (
 	//"time"
 	//"net/http"
 	"bytes"
-	"net/url"
-	"strings"
+	//"net/url"
+	//"strings"
 	//"encoding/xml"
 	//"encoding/json"
 	//"strconv"
-	//"github.com/op/go-logging"
+	"github.com/op/go-logging"
 )
 
-//var log = logging.MustGetLogger("netgo")
+var log = logging.MustGetLogger("netgo")
 
 var (
 // a source of numbers, for naming temporary files
@@ -32,6 +32,8 @@ var (
 //portMapRule = regexp.MustCompile(`^([1-9][0-9]*?):([1-9][0-9]*?)$`)
 //timeout = flag.Uint("timeout", 10, "timeout sec to wait between search queries")
 )
+
+type MethodType string
 
 type IMethodType interface {
 	Named() string
@@ -130,59 +132,6 @@ type NetgoHtml struct {
 		Selected      []string
 		Unselected    []string
 	}
-}
-
-func Netgo_GenerateHtml(u *url.URL) (NetgoHtml, string) {
-	var html_out NetgoHtml
-	html_out.Host = u.Host
-	html_out.Path = u.Path
-	html_out.Search = ""
-	html_out.Method = string(Method_TpbFile)
-	html_out.Page = "0"
-
-	html_out.Categories.Checked = init_category_checks("checked")
-
-	debug := ""
-
-	if u == nil {
-		return html_out, debug
-	}
-	if u.Path == "" {
-		return html_out, debug
-	}
-	path := u.Path[1:]
-
-	list := strings.Split(path, "/")
-	for index, entry := range list {
-		log.Info("[%d] [%s]", index, entry)
-		if entry == "" {
-			continue
-		}
-
-		// add error handling
-		switch index {
-		case 0:
-			html_out.Search = entry
-		case 1:
-			html_out.Categories.Short = entry
-		case 2:
-			html_out.Orders.Short = entry
-		case 3:
-			html_out.Page = entry
-		}
-	}
-
-	html_out.Orders.SelectedAbv = update_selected_sorts(html_out.Orders.Short)
-	html_out.Orders.Short = strings.Join(html_out.Orders.SelectedAbv, "")
-
-	html_out.Categories.Checked = update_category_checks(html_out.Categories.Short)
-
-	html_out.Orders.UnselectedAbv = update_available_sorts(html_out.Orders.SelectedAbv)
-
-	html_out.Orders.Selected = get_orders_from_abvs(html_out.Orders.SelectedAbv)
-	html_out.Orders.Unselected = get_orders_from_abvs(html_out.Orders.UnselectedAbv)
-
-	return html_out, debug
 }
 
 func init_category_checks(s string) map[string]string {

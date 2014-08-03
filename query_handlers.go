@@ -6,7 +6,6 @@ import (
 	"net/url"
 )
 
-
 type CriteriaFromQuery struct {
 	Name     string
 	Method   string
@@ -16,29 +15,7 @@ type CriteriaFromQuery struct {
 	Debug    string
 }
 
-func GetSearchCriteria(query CriteriaFromQuery) SearchCriteria {
-	var criteria SearchCriteria
-	
-	criteria.Name = query.Name
-	criteria.Method = Method_TpbFile
-	criteria.Category = GetCategory(query.Category)
-	criteria.Order = GetOrder(query.Order)
-	criteria.Page = query.Page
-	
-	return criteria
-}
-
-func GetTpbSearchCriteriaFromUrl(u *url.URL) (TpbSearchCriteria, string) {
-	dbg := ""
-
-	url_params := GetParamsFromUrl(u)
-	search_criteria := GetSearchCriteria(url_params)
-	tpb_criteria := ConvertCriteriaForTpb(search_criteria)
-	
-	return tpb_criteria, dbg
-}
-
-func GetParamsFromUrl(u *url.URL) (CriteriaFromQuery) {
+func GetParamsFromUrl(u *url.URL) CriteriaFromQuery {
 	var criteria CriteriaFromQuery
 	criteria.Name = ""
 	criteria.Category = "Uncategorized"
@@ -80,5 +57,3 @@ func GetParamsFromUrl(u *url.URL) (CriteriaFromQuery) {
 
 	return criteria
 }
-
-

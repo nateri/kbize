@@ -180,7 +180,8 @@ func NetgetRequestHandler(w *bytes.Buffer, req *http.Request) error {
 	}
 	log.Debug("%+v", criteria2)
 
-	criteria, _ := Netgo_GenerateHtml(req.URL)
+	criteria := struct {
+	}{}
 
 	if err := WriteHtmlFromTemplate(w, "html/head.html", criteria); err != nil {
 		return err
@@ -205,54 +206,6 @@ func NetgetRequestHandler(w *bytes.Buffer, req *http.Request) error {
 	fmt.Fprintf(w, "</div></div></div><!-- //div:content -->\n\n")
 
 	fmt.Fprintf(w, "</body>\n</html>\n\n")
-
-	return nil
-}
-
-func TpbSearchRequestHandler(w *bytes.Buffer, req *http.Request) error {
-	LogRequest("TpbSearch", req)
-
-	req.Close = true
-	devmode := false
-
-	tpb_criteria, test_str := GetTpbSearchCriteriaFromUrl(req.URL)
-	if test_str != "" {
-		devmode = true
-	}
-	if devmode {
-		Serialize("criteria.log", tpb_criteria)
-	}
-
-	results := SearchTpb(tpb_criteria)
-
-	out := struct {
-		Criteria TpbSearchCriteria
-		Results  []SearchResult
-	}{
-		tpb_criteria,
-		results,
-	}
-
-	response_json, err := json.MarshalIndent(out, "", "    ")
-	if err != nil {
-		Serialize("results.log", err)
-		return err
-	}
-
-	resultDbg := struct {
-		RemoteAddr string
-		NumResults int
-		//Time string
-	}{
-		req.RemoteAddr,
-		len(results),
-	}
-	log.Info("[ResultDbg ] %v", resultDbg)
-
-	if devmode {
-		Serialize("results.log", string(response_json))
-	}
-	fmt.Fprintf(w, "%+v", string(response_json))
 
 	return nil
 }

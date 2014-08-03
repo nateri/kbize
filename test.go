@@ -1,57 +1,27 @@
 package netgo
 
 import (
-	//"log"
-	//"github.com/op/go-logging"
+//"log"
+//"github.com/op/go-logging"
 
 )
+
 //var log = logging.MustGetLogger("netgo")
 
-
-func TestTpbSearchCriteria(criteria SearchCriteria) TpbSearchCriteria {
-
-	tpb_criteria := ConvertCriteriaForTpb(criteria)
-	log.Debug("%v", tpb_criteria)
-	
-	return tpb_criteria
+type Criteria struct {
 }
 
-func TestTpbSearch(criteria TpbSearchCriteria) []SearchResult {
+func TestCriteria(criteria Criteria) bool {
 
-	entries := TpbSearch(criteria, "&format=json")
-	log.Debug("%v", entries)
-	
-	return entries
+	return true
 }
 
-func TestTpbYqlJson(in string) []SearchResult {
+func TestApp() bool {
 
-	entries := TpbGetResultsJson(in)
-	
-	return entries
+	return true
 }
 
-func TestNetgo() {
+func TestJson(in string) bool {
 
-	// Verify SearchResults from a static json string
-	tpbJsonOut := TestTpbYqlJson(TestTpbJsonStr)
-	for index, entry := range tpbJsonOut {
-		log.Debug("[%d] %+v\n", index, entry)
-	}
-	
-	// Verify TpbSearchCriteria from a SearchCriteria
-	tpbCriteriaOut := TestTpbSearchCriteria( SearchCriteria {
-		Name : "linux",
-		Category : Category_Audio,
-		Order : Order_Seed_Most,
-		Page : "0",
-	})
-	log.Debug("%+v", tpbCriteriaOut)
-	
-	// Verify SearchResults from a TpbSearchCriteria
-	tpbSearchOut := TestTpbSearch(tpbCriteriaOut)
-	for index, entry := range tpbSearchOut {
-		log.Debug("[%d] %+v\n", index, entry)
-	}
+	return true
 }
-
