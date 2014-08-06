@@ -19,6 +19,7 @@ import (
 	//"encoding/json"
 	//"strconv"
 	"bytes"
+	"errors"
 	"fmt"
 	"github.com/nateri/kbize"
 	"github.com/op/go-logging"
@@ -193,7 +194,10 @@ func set_headers(w http.ResponseWriter, headers Headers) {
 }
 func WriteErrorPageStart(w *bytes.Buffer) error {
 
-	fmt.Fprintf(w, val("html_tag_start"))
+	// does it make sense to catch errors here?
+	if err := recoverable_write(w, val("html_tag_start")); err != nil {
+		return err
+	}
 
 	head := struct {
 		Name   string
@@ -209,9 +213,14 @@ func WriteErrorPageStart(w *bytes.Buffer) error {
 		return err
 	}
 
-	err := recoverable_write(w, val("body_tag_start"))
+	// does it make sense to catch errors here?
+	if err := recoverable_write(w, val("body_tag_start")); err != nil {
+		return err
+	}
+	if err := recoverable_write(w, val("generic_error")); err != nil {
+		return err
+	}
 
-	fmt.Fprintf(w, val("generic_error"))
 	return nil
 }
 func WriteErrorPageEnd(w *bytes.Buffer) {
@@ -230,11 +239,11 @@ func Recoverable(err *error, h ResetHandler) {
 		// find out exactly what the error was and set err
 		switch x := e.(type) {
 		case string:
-			err = errors.New(x)
+			*err = errors.New(x)
 		case error:
-			err = x
+			*err = x
 		default:
-			err = errors.New("Unknown panic")
+			*err = errors.New("Unknown panic")
 		}
 		// return the modified err
 
@@ -246,6 +255,7 @@ func recoverable_write(w *bytes.Buffer, instr string) (err error) {
 	fmt.Fprintf(w, instr)
 	// Fprintf may panic --
 	//  recover() will return immediately on fail
+	return nil
 }
 
 func val(Name string) string {
