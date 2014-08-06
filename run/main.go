@@ -80,9 +80,6 @@ func AddHttpHandlers() {
 
 	http.Handle("/kbize/", DynHandle{netgo.KbizeRequestHandler, "Kbize", false})
 
-	http.Handle("/netget/", DynHandle{netgo.KbizeRequestHandler, "Netget", false})
-	//http.Handle("/tpb/", DynHandle{netgo.TpbSearchRequestHandler, "TpbSearch", true})
-
 	http.Handle("/shutdown/", DynHandle{netgo.ShutdownRequestHandler, "Shutdown", false})
 
 	// Mandatory root-based resources
@@ -92,34 +89,55 @@ func AddHttpHandlers() {
 
 }
 
+type Headers struct {
+	Origin    string
+	TodoLater bool
+}
+type ErrorPage struct {
+	content string
+}
+
+func (p *ErrorPage) Set(in string) {
+	p.content = in
+}
+
+//func (b *Buffer) Bytes() []byte
+func (p *ErrorPage) Bytes() []byte {
+	var page bytes.Buffer
+
+	if err := WriteErrorPageStart(&page); err != nil {
+		// @TODO: What do we do when the error page itself fails to be generated?!
+		// Maybe this should be hard-coded rather than read from a file...
+		return nil
+	}
+
+	page.Write([]byte(p.content))
+
+	WriteErrorPageEnd(&page)
+
+	return page.Bytes()
+}
+
 func (d DynHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Debug("[ServeHTTP] [%s] [Add Headers: %t]", d.dbg, d.headers)
 
+	// Handle error gracefully
+	recover_handler := func() {
+		// w went into a bad state during write
+		//  Reset and return
+		//w.Reset()
+	}
+	// Unused -- ServeHTTP cannot return an error
+	var unused_err error
+	defer Recoverable(&unused_err, recover_handler)
+
 	var page bytes.Buffer
-	var error_page bytes.Buffer
+	var error_page ErrorPage
 
-	if d.headers {
-		log.Debug("[ServeHTTP] [write headers]")
-
-		if origin := r.Header.Get("Origin"); origin != "" {
-			w.Header().Set("Access-Control-Allow-Origin", origin)
-		}
-		//w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-	}
-
-	if err := WriteErrorPageStart(&error_page); err != nil {
-		// @TODO: What do we do when the error page itself fails to be generated?!
-		// Maybe this should be hard-coded rather than read from a file...
-
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintln(w, "Catastrphic error generating the error page!")
-		fmt.Fprintln(w, err.Error())
-		return
-	}
+	var headers Headers
+	headers.TodoLater = d.headers
+	headers.Origin = r.Header.Get("Origin")
+	set_headers(w, headers)
 
 	// GracefulHandler should NOT write to w unless there is no error
 	if err := d.gh(&page, r); err != nil {
@@ -129,25 +147,18 @@ func (d DynHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case "NotFound":
 			log.Warning("[ServeHTTP] [NotFound]")
 
-			//w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintln(&error_page, "404 page not found")
-
-			WriteErrorPageEnd(&error_page)
-			fmt.Fprintln(w, &error_page)
+			error_page.Set(val("404_error"))
 
 		default:
 			log.Warning("[ServeHTTP] [start]\n" + page.String())
 			log.Warning("[ServeHTTP] [end]")
 
-			//w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintln(&error_page, err.Error())
-
-			WriteErrorPageEnd(&error_page)
-			fmt.Fprintln(w, &error_page)
+			error_page.Set(err.Error())
 		}
 
+		w.Write(error_page.Bytes())
 		return
 	}
 
@@ -163,6 +174,101 @@ func FileRequestHandler(w http.ResponseWriter, req *http.Request) {
 	netgo.LogRequest("File", req)
 	// @TODO: ServeFile writes directly to ResponseWriter
 	http.ServeFile(w, req, "./static/img"+req.URL.Path)
+}
+
+func set_headers(w http.ResponseWriter, headers Headers) {
+
+	log.Debug("[set_headers]")
+
+	if headers.Origin != "" {
+		w.Header().Set("Access-Control-Allow-Origin", headers.Origin)
+	}
+
+	if headers.TodoLater {
+		//w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+	}
+}
+func WriteErrorPageStart(w *bytes.Buffer) error {
+
+	fmt.Fprintf(w, val("html_tag_start"))
+
+	head := struct {
+		Name   string
+		Method string
+		Host   string
+	}{
+		"NetgoTest!",
+		"Errors",
+		"",
+	}
+
+	if err := netgo.WriteHtmlFromTemplate(w, "html/head.html", head); err != nil {
+		return err
+	}
+
+	err := recoverable_write(w, val("body_tag_start"))
+
+	fmt.Fprintf(w, val("generic_error"))
+	return nil
+}
+func WriteErrorPageEnd(w *bytes.Buffer) {
+	fmt.Fprintf(w, val("body_tag_end"))
+	fmt.Fprintf(w, val("html_tag_end"))
+}
+
+type ResetHandler func()
+
+func Recoverable(err *error, h ResetHandler) {
+
+	if e := recover(); e != nil {
+		// e is the interface{} typed-value we passed to panic()
+		fmt.Println("Whoops: ", e) // Prints "Whoops: <err>!"
+
+		// find out exactly what the error was and set err
+		switch x := e.(type) {
+		case string:
+			err = errors.New(x)
+		case error:
+			err = x
+		default:
+			err = errors.New("Unknown panic")
+		}
+		// return the modified err
+
+		h()
+	}
+}
+func recoverable_write(w *bytes.Buffer, instr string) (err error) {
+
+	fmt.Fprintf(w, instr)
+	// Fprintf may panic --
+	//  recover() will return immediately on fail
+}
+
+func val(Name string) string {
+
+	switch Name {
+
+	case "html_tag_start":
+		return "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+	case "html_tag_end":
+		return "</html>\n"
+
+	case "body_tag_start":
+		return "<body>\n"
+	case "body_tag_end":
+		return "</body>\n"
+
+	case "404_error":
+		return "404 page not found"
+
+	default:
+	}
+
+	return ""
 }
 
 func InitLogging() {
@@ -184,29 +290,9 @@ func InitLogging() {
 	logging.SetLevel(logging.INFO, "netgo")
 }
 
-func WriteErrorPageStart(w *bytes.Buffer) error {
-
-	fmt.Fprintf(w, "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n")
-	fmt.Fprintf(w, "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n")
-
-	head := struct {
-		Name   string
-		Method string
-		Host   string
-	}{
-		"NetgoTest!",
-		"Errors",
-		"",
-	}
-
-	if err := netgo.WriteHtmlFromTemplate(w, "html/head.html", head); err != nil {
-		return err
-	}
-
-	fmt.Fprintf(w, "<body>\n")
-	return nil
-}
-func WriteErrorPageEnd(w *bytes.Buffer) {
-	fmt.Fprintf(w, "</body>\n")
-	fmt.Fprintf(w, "</html>\n")
-}
+/*
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusInternalServerError)
+	fmt.Fprintln(w, "Catastrphic error generating the error page!")
+	fmt.Fprintln(w, err.Error())
+*/
